@@ -37,6 +37,7 @@ enum EtherType
     ETHERTYPE_GPTP = 0x88F7;
     ETHERTYPE_TTETH = 0x891D;
     ETHERTYPE_IEEE8021_R_TAG = 0xF1C1;
+	ETHERTYPE_GOOSE = 0x88B8;
 }
 
 cplusplus {{
