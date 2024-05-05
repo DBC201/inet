@@ -65,7 +65,7 @@ class INET_API Protocol
     static const Protocol ethernetMac;
     static const Protocol ethernetPhy;
     static const Protocol ftp;
-	static const Protocol goose;
+    static const Protocol goose;
     static const Protocol gpsr;
     static const Protocol gptp;
     static const Protocol http;
