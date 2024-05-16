@@ -53,6 +53,7 @@ void UdpEncapsulatorApp::handleMessageWhenUp(cMessage* message) {
     if (incoming->getTag<PacketProtocolTag>()->getProtocol() != &Protocol::ethernetMac)
             throw cRuntimeError("Unaccepted packet protocol specified on upper layer incoming packet");
     auto payload = incoming->removeData();
+    payload->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     std::string name(incoming->getName());
     delete incoming;
     Packet *outgoing = new Packet(name.c_str(), payload);
@@ -61,23 +62,29 @@ void UdpEncapsulatorApp::handleMessageWhenUp(cMessage* message) {
 
 void UdpEncapsulatorApp::socketDataArrived(UdpSocket *socket, Packet *packet) {
     // decapsulate and write to ethernetOut
+
+    std::string name(packet->getName());
+
     if (!decapsulate) {
-        EV_INFO << "Received udp packet, discarding..." << endl;
+        EV_INFO << "Discarding " << name << endl;
         delete packet;
         return;
     }
+
     auto payload = packet->removeData();
-    std::string name(packet->getName());
+    auto protocol = payload->findTag<PacketProtocolTag>();
     delete packet;
 
-    if (name.substr(0, 3) != "Ext") {
-        // only decapsulate external packets
+    if (protocol == nullptr || protocol->getProtocol() != &Protocol::ethernetMac) {
+        EV_INFO << "Discarding " << name << endl;
         return;
     }
 
-    auto goose_packet = new Packet(name.c_str(), payload);
-    goose_packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-    send(goose_packet, "ethernetOut");
+//    payload->removeTag<PacketProtocolTag>();
+
+    auto decapsulated_packet = new Packet(name.c_str(), payload);
+    decapsulated_packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    send(decapsulated_packet, "ethernetOut");
 }
 
 void UdpEncapsulatorApp::socketErrorArrived(UdpSocket *socket, Indication *indication) {
