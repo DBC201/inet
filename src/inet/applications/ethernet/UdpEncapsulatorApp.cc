@@ -45,6 +45,7 @@ void UdpEncapsulatorApp::handleMessageWhenUp(cMessage* message) {
 
     if (!encapsulate) {
         EV_INFO << "Received packet from ethernetIn, discarding..." << endl;
+        delete message;
         return;
     }
 
